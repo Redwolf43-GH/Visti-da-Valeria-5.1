@@ -1,0 +1,1506 @@
+<!doctype html>
+<html lang="it">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Visti da Valeria</title>
+<meta name="theme-color" content="#0b1a1c">
+<link rel="manifest" href="manifest.webmanifest">
+<link rel="icon" type="image/png" href="icon-192.png">
+<link rel="apple-touch-icon" href="icon-192.png">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Figtree:wght@400;500;600;700&family=Limelight&display=swap">
+<style>
+  /* Mare di notte: fondo blu-verde profondo, verde acqua per le azioni,
+     oro per le stelle e i numeri degli anni. */
+  :root {
+    color-scheme: dark;
+    --bg: #0b1a1c;
+    --surface: #11262a;
+    --surface-2: #193338;
+    --line: #2b4b51;
+    --text: #eef6f1;
+    --muted: #9dbbb9;
+    --accent: #3fd0b4;
+    --accent-ink: #052521;
+    --gold: #f6c453;
+    --star-off: #2c4a50;
+    --danger: #ff9a86;
+    --display: Limelight, "Bodoni 72", Didot, Georgia, serif;
+    --body: Figtree, system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+    --s: 24px;
+  }
+  * { box-sizing: border-box; }
+  [hidden] { display: none !important; }
+  html { -webkit-text-size-adjust: 100%; }
+  body {
+    margin: 0;
+    background: var(--bg) radial-gradient(ellipse 90% 340px at 50% -120px, rgba(63, 208, 180, .16), transparent) no-repeat;
+    color: var(--text);
+    font: 16px/1.45 var(--body);
+  }
+  input, select, button { font-family: var(--body); }
+  .wrap { max-width: 720px; margin: 0 auto; padding: 28px 16px 64px; }
+
+  header h1 {
+    font-family: var(--display);
+    font-size: 3rem;
+    font-weight: 400;
+    line-height: 1.1;
+    letter-spacing: .02em;
+    color: var(--gold);
+    margin: 0;
+    text-wrap: balance;
+  }
+  header { display: flex; align-items: flex-start; justify-content: space-between; gap: 12px; margin-bottom: 20px; }
+  header > div { min-width: 0; }
+  header p { margin: 2px 0 0; color: var(--muted); }
+  .logo { flex: none; width: 60px; height: 60px; }
+  .boat-hull { fill: var(--accent); }
+  .boat-sail { fill: var(--text); }
+  .boat-mast { stroke: var(--text); stroke-width: 2.5; stroke-linecap: round; }
+  .wave-line { fill: none; stroke: var(--accent); stroke-width: 3; stroke-linecap: round; }
+
+  /* Apertura: la barca cavalca un'onda, poi la schermata svanisce da sola.
+     Non intercetta i tocchi, quindi l'app sotto è subito utilizzabile. */
+  .splash {
+    position: fixed;
+    inset: 0;
+    z-index: 100;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 18px;
+    background: var(--bg);
+    pointer-events: none;
+    animation: splash-out .5s ease 2.7s forwards;
+  }
+  .splash .sea { position: relative; width: min(320px, 80vw); height: 150px; overflow: hidden; }
+  .splash .boat {
+    position: absolute;
+    left: 50%;
+    bottom: 22px;
+    width: 110px;
+    height: 110px;
+    margin-left: -55px;
+    transform-origin: 50% 85%;
+    animation: ride 1.6s linear infinite;
+  }
+  .splash .wave { position: absolute; left: 0; bottom: 0; width: 1000px; height: 40px; animation: roll 1.6s linear infinite; }
+  .splash .wave path { stroke-width: 5; }
+  .splash .name { margin: 0; font-family: var(--display); font-size: 1.8rem; letter-spacing: .02em; color: var(--gold); }
+  @keyframes roll { to { transform: translateX(-200px); } }
+  @keyframes ride {
+    0%   { transform: translateY(9px) rotate(-4deg); }
+    20%  { transform: translateY(0) rotate(-10deg); }
+    45%  { transform: translateY(-10px) rotate(0deg); }
+    70%  { transform: translateY(0) rotate(10deg); }
+    95%  { transform: translateY(10px) rotate(0deg); }
+    100% { transform: translateY(9px) rotate(-4deg); }
+  }
+  @keyframes splash-out { to { opacity: 0; visibility: hidden; } }
+  @media (prefers-reduced-motion: reduce) {
+    .splash { animation-delay: 1s; }
+    .splash .boat, .splash .wave { animation: none; }
+  }
+
+  .account {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 8px 12px;
+    margin-bottom: 16px;
+    padding: 10px 14px;
+    background: var(--surface);
+    border: 1px solid var(--line);
+    border-radius: 12px;
+    color: var(--muted);
+    font-size: .875rem;
+  }
+  .account p { margin: 0; }
+  .account #account-text { flex: 1; min-width: 180px; overflow-wrap: anywhere; }
+  .account .msg { flex-basis: 100%; }
+  .account-actions { display: flex; flex-wrap: wrap; gap: 8px; }
+  .tabs {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 4px;
+    padding: 4px;
+    background: var(--surface);
+    border: 1px solid var(--line);
+    border-radius: 12px;
+  }
+  .tab {
+    appearance: none;
+    border: 0;
+    background: transparent;
+    color: var(--muted);
+    font: inherit;
+    font-weight: 600;
+    padding: 10px 12px;
+    border-radius: 9px;
+    cursor: pointer;
+  }
+  .tab .count { font-weight: 400; opacity: .75; margin-left: 4px; }
+  .tab[aria-selected="true"] { background: var(--accent); color: var(--accent-ink); }
+
+  .add {
+    margin-top: 16px;
+    padding: 14px;
+    background: var(--surface);
+    border: 1px solid var(--line);
+    border-radius: 12px;
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 10px;
+  }
+  .add { position: relative; }
+  .suggest {
+    position: absolute;
+    left: 14px;
+    right: 14px;
+    z-index: 10;
+    max-height: 320px;
+    overflow-y: auto;
+    background: var(--surface);
+    border: 1px solid var(--line);
+    border-radius: 10px;
+    box-shadow: 0 10px 28px rgba(0, 0, 0, .28);
+  }
+  .suggest .opt {
+    padding: 10px 12px;
+    min-height: 44px;
+    cursor: pointer;
+    border-bottom: 1px solid var(--line);
+  }
+  .suggest .opt:last-child { border-bottom: 0; }
+  .suggest .opt[aria-selected="true"], .suggest .opt:hover { background: var(--surface-2); }
+  .suggest .opt b { display: block; font-weight: 600; overflow-wrap: anywhere; }
+  .suggest .opt small { display: block; color: var(--muted); font-size: .8rem; }
+  .add .row2 {
+    grid-column: 1 / -1;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+    flex-wrap: wrap;
+  }
+  label.field { display: block; }
+  .add .full { grid-column: 1 / -1; }
+  label.field span {
+    display: block;
+    font-size: .85rem;
+    font-weight: 500;
+    color: var(--muted);
+    margin-bottom: 4px;
+  }
+  input[type="text"], input[type="number"], input[type="search"], select {
+    width: 100%;
+    font: inherit;
+    color: var(--text);
+    background: var(--bg);
+    border: 1px solid var(--line);
+    border-radius: 8px;
+    padding: 10px 12px;
+  }
+  input:focus-visible, select:focus-visible, button:focus-visible, .stars:focus-visible {
+    outline: 2px solid var(--gold);
+    outline-offset: 2px;
+  }
+  .btn {
+    appearance: none;
+    font: inherit;
+    font-weight: 600;
+    border: 1px solid var(--line);
+    background: var(--surface-2);
+    color: var(--text);
+    padding: 10px 16px;
+    border-radius: 8px;
+    cursor: pointer;
+  }
+  .btn.primary { background: var(--accent); border-color: var(--accent); color: var(--accent-ink); }
+  .btn.danger { color: var(--danger); }
+  .btn.small { padding: 6px 10px; font-size: .875rem; font-weight: 500; }
+
+  .rating-pick { display: flex; align-items: center; gap: 6px 10px; flex-wrap: wrap; }
+  .rating { display: inline-flex; align-items: center; gap: 8px; flex: none; }
+  .step {
+    appearance: none;
+    flex: none;
+    width: 32px;
+    height: 32px;
+    padding: 0;
+    border: 1px solid var(--line);
+    border-radius: 50%;
+    background: var(--surface-2);
+    color: var(--gold);
+    font: inherit;
+    font-size: .8rem;
+    line-height: 1;
+    cursor: pointer;
+    touch-action: manipulation;
+  }
+  .step:disabled { opacity: .35; cursor: default; }
+  .rating-pick output { color: var(--muted); font-variant-numeric: tabular-nums; min-width: 3.5em; }
+
+  /* Stelle */
+  .stars {
+    display: inline-flex;
+    cursor: pointer;
+    border-radius: 6px;
+    touch-action: manipulation;
+    user-select: none;
+    -webkit-user-select: none;
+  }
+  .star { position: relative; width: var(--s); height: var(--s); flex: none; }
+  .star svg { position: absolute; top: 0; left: 0; width: var(--s); height: var(--s); fill: var(--star-off); }
+  .star .fill { position: absolute; top: 0; left: 0; height: 100%; overflow: hidden; width: 0; }
+  .star .fill svg { fill: var(--gold); }
+  .stars.big { --s: 32px; }
+  .msg { margin: 0; color: var(--danger); font-size: .875rem; }
+  .notice {
+    margin: 12px 0 0;
+    padding: 10px 12px;
+    border: 1px solid var(--line);
+    border-radius: 8px;
+    color: var(--muted);
+    font-size: .875rem;
+  }
+  footer .io-msg { flex-basis: 100%; margin: 0; color: var(--text); }
+  .hint { display: none; margin: 0; color: var(--muted); font-size: .8rem; }
+  @media (pointer: coarse) {
+    .stars { --s: 34px; }
+    .stars.big { --s: 40px; }
+    .step { width: 38px; height: 38px; }
+    .hint { display: block; }
+  }
+
+  .toolbar {
+    display: flex;
+    justify-content: flex-end;
+    align-items: center;
+    gap: 8px;
+    margin-top: 22px;
+    color: var(--muted);
+    font-size: .875rem;
+  }
+  .toolbar select { width: auto; padding: 6px 10px; font-size: .875rem; }
+  .search-btn { display: inline-flex; align-items: center; gap: 6px; margin-right: auto; }
+  .search-btn svg { width: 16px; height: 16px; fill: none; stroke: currentColor; stroke-width: 2; stroke-linecap: round; }
+  .search-btn[aria-expanded="true"] { border-color: var(--accent); color: var(--accent); }
+  .search-row { margin-top: 10px; }
+  .released { margin-left: 6px; color: var(--muted); font-weight: 400; white-space: nowrap; }
+
+  .year { margin-top: 18px; }
+  .year-head {
+    display: flex;
+    align-items: baseline;
+    justify-content: space-between;
+    gap: 12px;
+    border-bottom: 1px solid var(--line);
+    padding-bottom: 6px;
+  }
+  .year-head h2 {
+    font-family: var(--display);
+    font-size: 2.1rem;
+    font-weight: 400;
+    line-height: 1.1;
+    letter-spacing: .03em;
+    color: var(--gold);
+    margin: 0;
+  }
+  .year-head .meta { color: var(--muted); font-size: .875rem; text-align: right; }
+  .year-tools { display: flex; align-items: center; justify-content: flex-end; flex-wrap: wrap; gap: 6px 10px; }
+  .copy { display: inline-flex; align-items: center; gap: 6px; flex: none; }
+  .copy svg { width: 16px; height: 16px; fill: none; stroke: currentColor; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; }
+
+  ul.items { list-style: none; margin: 0; padding: 0; }
+  .item {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 12px 0;
+    border-bottom: 1px solid var(--line);
+  }
+  .item .title { flex: 1; min-width: 0; overflow-wrap: anywhere; font-weight: 500; }
+  .season {
+    display: inline-block;
+    margin-left: 8px;
+    padding: 1px 8px;
+    border: 1px solid var(--line);
+    border-radius: 999px;
+    color: var(--muted);
+    font-size: .8rem;
+    font-weight: 400;
+    white-space: nowrap;
+    vertical-align: middle;
+  }
+  .item .icon-btn {
+    appearance: none;
+    border: 0;
+    background: transparent;
+    color: var(--muted);
+    font-size: 1.1rem;
+    width: 36px;
+    height: 36px;
+    border-radius: 8px;
+    cursor: pointer;
+    flex: none;
+  }
+  .item .icon-btn:hover { background: var(--surface-2); color: var(--text); }
+
+  .empty {
+    margin-top: 28px;
+    padding: 36px 16px;
+    text-align: center;
+    color: var(--muted);
+    border: 1px dashed var(--line);
+    border-radius: 12px;
+  }
+
+  footer {
+    margin-top: 40px;
+    padding-top: 16px;
+    border-top: 1px solid var(--line);
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 8px 12px;
+    color: var(--muted);
+    font-size: .875rem;
+  }
+  footer .grow { flex: 1; min-width: 200px; }
+
+  dialog {
+    border: 1px solid var(--line);
+    border-radius: 14px;
+    background: var(--surface);
+    color: var(--text);
+    padding: 20px;
+    width: min(420px, calc(100vw - 32px));
+  }
+  dialog::backdrop { background: rgba(0, 0, 0, .55); }
+  dialog h3 { margin: 0 0 14px; font-size: 1.15rem; }
+  dialog .grid { display: grid; gap: 12px; }
+  dialog .two { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+  dialog .actions { display: flex; gap: 8px; margin-top: 18px; }
+  dialog .actions .spacer { flex: 1; }
+
+  @media (max-width: 480px) {
+    header h1 { font-size: 2.6rem; }
+    .item { flex-wrap: wrap; }
+    .item .title { flex-basis: calc(100% - 46px); order: 1; }
+    .item .icon-btn { order: 2; }
+    .item .rating { order: 3; }
+  }
+</style>
+</head>
+<body>
+<svg width="0" height="0" style="position:absolute" aria-hidden="true">
+  <symbol id="boat" viewBox="0 0 64 64">
+    <line class="boat-mast" x1="30" y1="8" x2="30" y2="40"/>
+    <path class="boat-sail" d="M33 10 L53 37 H33 Z"/>
+    <path class="boat-sail" d="M27 16 V37 H12 Z"/>
+    <path class="boat-hull" d="M7 41 H57 L49 52 H15 Z"/>
+  </symbol>
+</svg>
+
+<div class="splash" aria-hidden="true">
+  <div class="sea">
+    <svg class="boat" viewBox="0 0 64 64"><use href="#boat"/></svg>
+    <svg class="wave" viewBox="0 0 1000 40"><path class="wave-line" d="M0 20 Q 50 0 100 20 T 200 20 T 300 20 T 400 20 T 500 20 T 600 20 T 700 20 T 800 20 T 900 20 T 1000 20"/></svg>
+  </div>
+  <p class="name">Visti da Valeria</p>
+</div>
+
+<div class="wrap">
+  <header>
+    <div>
+      <h1>Visti da Valeria</h1>
+      <p>Il diario di quello che guardo, anno per anno.</p>
+    </div>
+    <svg class="logo" viewBox="0 0 64 64" role="img" aria-label="Barca a vela su un'onda">
+      <use href="#boat"/>
+      <path class="wave-line" d="M2 58 Q 9.5 52 17 58 T 32 58 T 47 58 T 62 58"/>
+    </svg>
+  </header>
+
+  <section class="account" id="account" aria-label="Account" hidden>
+    <p id="account-text"></p>
+    <div class="account-actions">
+      <button class="btn small" id="sign-in" type="button">Accedi con Google</button>
+      <button class="btn small" id="migrate" type="button" hidden></button>
+      <button class="btn small" id="sign-out" type="button" hidden>Esci</button>
+    </div>
+    <p class="msg" id="account-msg" role="alert" hidden></p>
+  </section>
+
+  <div class="tabs" role="tablist">
+    <button class="tab" role="tab" data-type="film" aria-selected="true">Film<span class="count" id="count-film"></span></button>
+    <button class="tab" role="tab" data-type="tv" aria-selected="false">Serie TV<span class="count" id="count-tv"></span></button>
+  </div>
+
+  <form class="add" id="add-form" autocomplete="off">
+    <label class="field full">
+      <span id="add-title-label">Titolo del film</span>
+      <input type="text" id="add-title" required maxlength="200" placeholder="Es. La grande bellezza"
+             role="combobox" aria-autocomplete="list" aria-controls="suggest" aria-expanded="false">
+    </label>
+    <div class="suggest" id="suggest" role="listbox" aria-label="Titoli suggeriti" hidden></div>
+    <label class="field">
+      <span id="add-released-label">Anno del film</span>
+      <input type="number" id="add-released" min="1880" max="2100" step="1" inputmode="numeric" placeholder="Facoltativo">
+    </label>
+    <label class="field">
+      <span>Visto nel</span>
+      <input type="number" id="add-year" required min="1900" max="2100" step="1" inputmode="numeric">
+    </label>
+    <label class="field full" id="add-season-field" hidden>
+      <span>Stagione</span>
+      <select id="add-season"></select>
+    </label>
+    <div class="row2">
+      <div class="rating-pick">
+        <span id="add-stars-slot"></span>
+        <output id="add-rating-out">Nessun voto</output>
+      </div>
+      <button class="btn primary" type="button" id="add-btn">Aggiungi</button>
+    </div>
+    <p class="msg full" id="add-msg" role="alert" hidden></p>
+    <p class="hint full">Tocca una stella per il voto pieno, toccala di nuovo per la mezza, una terza volta per togliere il voto. La freccia aggiunge mezza stella.</p>
+  </form>
+
+  <p class="notice" id="notice" role="status" hidden></p>
+
+  <div class="toolbar" id="toolbar">
+    <button class="btn small search-btn" id="search-toggle" type="button" aria-expanded="false" aria-controls="search-row">
+      <svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="10.5" cy="10.5" r="6.5"/><path d="M15.5 15.5 L21 21"/></svg>
+      <span>Cerca</span>
+    </button>
+    <label for="sort">Ordina per</label>
+    <select id="sort">
+      <option value="recent">Aggiunti di recente</option>
+      <option value="rating">Voto</option>
+      <option value="title">Titolo</option>
+    </select>
+  </div>
+
+  <div class="search-row" id="search-row" hidden>
+    <input type="search" id="search" aria-label="Cerca nell'elenco" autocomplete="off">
+  </div>
+
+  <main id="list"></main>
+
+  <footer>
+    <span class="grow"><span id="store-info">I dati restano salvati in questo browser. Usa Esporta per farne una copia o spostarli su un altro dispositivo.</span> I titoli suggeriti arrivano da Wikidata: per cercarli, quello che scrivi nel campo titolo viene inviato a wikidata.org.</span>
+    <button class="btn small" id="export" type="button">Esporta</button>
+    <button class="btn small" id="import" type="button">Importa</button>
+    <input type="file" id="import-file" accept="application/json,.json" hidden>
+    <p class="io-msg" id="io-msg" role="status" hidden></p>
+  </footer>
+</div>
+
+<dialog id="edit-dialog">
+  <form method="dialog" id="edit-form">
+    <h3>Modifica</h3>
+    <div class="grid">
+      <label class="field">
+        <span>Titolo</span>
+        <input type="text" id="edit-title" required maxlength="200">
+      </label>
+      <label class="field">
+        <span id="edit-released-label">Anno del film</span>
+        <input type="number" id="edit-released" min="1880" max="2100" step="1" inputmode="numeric" placeholder="Facoltativo">
+      </label>
+      <div class="two">
+        <label class="field">
+          <span>Visto nel</span>
+          <input type="number" id="edit-year" required min="1900" max="2100" step="1" inputmode="numeric">
+        </label>
+        <label class="field">
+          <span>Categoria</span>
+          <select id="edit-type">
+            <option value="film">Film</option>
+            <option value="tv">Serie TV</option>
+          </select>
+        </label>
+      </div>
+      <label class="field" id="edit-season-field">
+        <span>Stagione</span>
+        <select id="edit-season"></select>
+      </label>
+      <div class="rating-pick">
+        <span id="edit-stars-slot"></span>
+        <output id="edit-rating-out"></output>
+      </div>
+    </div>
+    <div class="actions">
+      <button class="btn danger" type="button" id="edit-delete">Elimina</button>
+      <span class="spacer"></span>
+      <button class="btn" type="button" id="edit-cancel">Annulla</button>
+      <button class="btn primary" type="button" id="edit-save">Salva</button>
+    </div>
+  </form>
+</dialog>
+
+<script>
+(function () {
+  'use strict';
+
+  // Account Google e sincronizzazione tra dispositivi (Firebase).
+  // Incolla qui il blocco firebaseConfig del tuo progetto, al posto di null:
+  //   var FIREBASE_CONFIG = { apiKey: '...', authDomain: '...', projectId: '...', ... };
+  // Finché resta null l'app salva solo in questo browser.
+  var FIREBASE_CONFIG = {
+    apiKey: 'AIzaSyB8bLlO_df-Bsg5X84Vmyvl2xINOjJ-XWw',
+    authDomain: 'film-e-serie-tv-g.firebaseapp.com',
+    projectId: 'film-e-serie-tv-g',
+    storageBucket: 'film-e-serie-tv-g.firebasestorage.app',
+    messagingSenderId: '251002452433',
+    appId: '1:251002452433:web:1a622e84688b026e5688f0'
+  };
+  var FIREBASE_VERSION = '10.12.2';
+
+  var KEY = 'visti-valeria-v1';
+
+  // Titoli già inseriti: vengono aggiunti alla lista una sola volta per browser,
+  // così se poi ne elimini uno non ritorna.
+  var SEED_KEY = 'visti-valeria-seed-marzo2026';
+  var SEED = [
+    {"id": "marzo2026-01", "title": "Franco Battiato - Il lungo viaggio", "type": "film", "season": 0, "released": 2026, "year": 2026, "rating": 1, "added": 1773500000000},
+    {"id": "marzo2026-02", "title": "Pattini d'argento", "type": "film", "season": 0, "released": 2020, "year": 2026, "rating": 4, "added": 1773499999000},
+    {"id": "marzo2026-03", "title": "Gloria il ritorno", "type": "film", "season": 0, "released": 2026, "year": 2026, "rating": 2, "added": 1773499998000},
+    {"id": "marzo2026-04", "title": "Tutta un'altra vita", "type": "film", "season": 0, "released": 2019, "year": 2026, "rating": 2, "added": 1773499997000},
+    {"id": "marzo2026-05", "title": "I Pionieri", "type": "film", "season": 0, "released": 2022, "year": 2026, "rating": 2, "added": 1773499996000},
+    {"id": "marzo2026-06", "title": "Imma Tataranni", "type": "tv", "season": 0, "released": 2026, "year": 2026, "rating": 0, "added": 1773499995000},
+    {"id": "marzo2026-07", "title": "Guerrieri", "type": "tv", "season": 0, "released": 2026, "year": 2026, "rating": 0, "added": 1773499994000},
+    {"id": "marzo2026-08", "title": "Cortina Express", "type": "film", "season": 0, "released": 2024, "year": 2026, "rating": 2, "added": 1773499993000},
+    {"id": "marzo2026-09", "title": "Il sapore della vittoria", "type": "film", "season": 0, "released": 2000, "year": 2026, "rating": 0, "added": 1773499992000},
+    {"id": "marzo2026-10", "title": "Lucky Luke", "type": "tv", "season": 0, "released": 2026, "year": 2026, "rating": 0, "added": 1773499991000}
+  ];
+  var STAR_PATH = 'M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z';
+  var SVG_NS = 'http://www.w3.org/2000/svg';
+  var MAX_SEASONS = 6; // 0 = tutte le stagioni
+
+  var storageBroken = false;
+  var items = load();
+  var tab = 'film';
+  var sortBy = 'recent';
+  var editingId = null;
+  var searchOpen = false;
+  var query = '';
+
+  var $ = function (id) { return document.getElementById(id); };
+
+  /* ---------- Dati ---------- */
+
+  function load() {
+    try {
+      var raw = localStorage.getItem(KEY);
+      var data = raw ? JSON.parse(raw) : [];
+      var list = Array.isArray(data) ? data.map(clean).filter(Boolean) : [];
+      if (!localStorage.getItem(SEED_KEY)) {
+        var have = {};
+        list.forEach(function (it) { have[it.id] = true; });
+        SEED.forEach(function (x) { if (!have[x.id]) list.push(clean(x)); });
+        localStorage.setItem(KEY, JSON.stringify(list));
+        localStorage.setItem(SEED_KEY, '1');
+      }
+      return list;
+    } catch (e) {
+      // archivio non disponibile (per esempio in un'anteprima): i titoli si vedono lo stesso
+      storageBroken = true;
+      return SEED.map(clean);
+    }
+  }
+
+  function writeLocal() {
+    try {
+      localStorage.setItem(KEY, JSON.stringify(items));
+    } catch (e) {
+      storageBroken = true;
+      showNotice();
+    }
+  }
+
+  function showNotice() {
+    var n = $('notice');
+    n.textContent = 'Qui i dati non possono essere salvati: i titoli che aggiungi spariranno alla chiusura della pagina.';
+    n.hidden = false;
+  }
+
+  function say(id, text) {
+    var el = $(id);
+    el.textContent = text;
+    el.hidden = !text;
+  }
+
+  // Normalizza una voce (serve anche per l'importazione)
+  function clean(x) {
+    if (!x || typeof x.title !== 'string' || !x.title.trim()) return null;
+    var year = parseInt(x.year, 10);
+    if (!year || year < 1900 || year > 2100) return null;
+    var rating = Math.round((Number(x.rating) || 0) * 2) / 2;
+    rating = Math.min(5, Math.max(0, rating));
+    var type = x.type === 'tv' ? 'tv' : 'film';
+    var released = parseInt(x.released, 10) || 0; // anno di uscita, facoltativo
+    if (released < 1880 || released > 2100) released = 0;
+    var season = type === 'tv' ? parseInt(x.season, 10) || 0 : 0;
+    if (season < 0 || season > MAX_SEASONS) season = 0;
+    return {
+      id: typeof x.id === 'string' && /^[A-Za-z0-9_-]{1,64}$/.test(x.id) ? x.id : newId(),
+      title: x.title.trim().slice(0, 200),
+      type: type,
+      season: season,
+      released: released,
+      year: year,
+      rating: rating,
+      added: Number(x.added) || Date.now()
+    };
+  }
+
+  /* ---------- Account Google (Firebase) ---------- */
+
+  var fbAuth = null, fbStore = null, auth = null, db = null;
+  var user = null;         // account con cui si è entrati, oppure null
+  var cloudReady = false;  // la lista dell'account è arrivata
+  var unsubscribe = null;
+
+  function itemRef(id) {
+    return fbStore.doc(db, 'users', user.uid, 'items', id);
+  }
+
+  function cloudFailed(err) {
+    var denied = err && err.code === 'permission-denied';
+    say('account-msg', denied
+      ? 'Il tuo account non ha il permesso di usare l\'archivio: controlla le regole di Firestore.'
+      : 'Non riesco a raggiungere il tuo account. Le modifiche verranno inviate appena torna la connessione.');
+  }
+
+  // Salva le voci indicate: nell'account se si è entrati, altrimenti nel browser
+  function persist(list) {
+    if (!user) { writeLocal(); return Promise.resolve(); }
+    var jobs = [];
+    for (var i = 0; i < list.length; i += 400) {
+      var batch = fbStore.writeBatch(db);
+      list.slice(i, i + 400).forEach(function (it) { batch.set(itemRef(it.id), it); });
+      jobs.push(batch.commit());
+    }
+    var all = Promise.all(jobs);
+    all.catch(cloudFailed);
+    return all;
+  }
+
+  function forget(id) {
+    if (!user) { writeLocal(); return; }
+    fbStore.deleteDoc(itemRef(id)).catch(cloudFailed);
+  }
+
+  function renderAccount() {
+    var local = user ? load().length : 0;
+    $('sign-in').hidden = !!user;
+    $('sign-out').hidden = !user;
+    $('migrate').hidden = !(user && cloudReady && local > 0);
+    $('migrate').textContent = local === 1
+      ? 'Carica nel tuo account il titolo salvato su questo dispositivo'
+      : 'Carica nel tuo account i ' + local + ' titoli salvati su questo dispositivo';
+    $('account-text').textContent = user
+      ? 'Accesso come ' + (user.email || 'account Google') + '. La lista è la stessa su tutti i tuoi dispositivi.'
+      : 'Accedi con Google per avere la stessa lista su tutti i tuoi dispositivi.';
+    $('store-info').textContent = user
+      ? 'I dati sono salvati nel tuo account Google. Usa Esporta per farne una copia.'
+      : 'I dati restano salvati in questo browser. Usa Esporta per farne una copia o spostarli su un altro dispositivo.';
+    if (user) $('notice').hidden = true;
+  }
+
+  function onUser(u) {
+    if (unsubscribe) { unsubscribe(); unsubscribe = null; }
+    user = u;
+    cloudReady = false;
+    say('account-msg', '');
+    if (!user) {
+      items = load();
+      renderAccount();
+      render();
+      return;
+    }
+    items = [];
+    renderAccount();
+    render();
+    var mine = user;
+    unsubscribe = fbStore.onSnapshot(fbStore.collection(db, 'users', user.uid, 'items'), function (snap) {
+      if (user !== mine) return;
+      var list = [];
+      snap.forEach(function (d) {
+        var it = clean(d.data());
+        if (it) { it.id = d.id; list.push(it); }
+      });
+      items = list;
+      cloudReady = true;
+      renderAccount();
+      render();
+    }, function (err) {
+      cloudReady = true;
+      cloudFailed(err);
+      render();
+    });
+  }
+
+  function initCloud() {
+    if (!FIREBASE_CONFIG) return;
+    var base = 'https://www.gstatic.com/firebasejs/' + FIREBASE_VERSION + '/';
+    Promise.all([
+      import(base + 'firebase-app.js'),
+      import(base + 'firebase-auth.js'),
+      import(base + 'firebase-firestore.js')
+    ]).then(function (m) {
+      var app = m[0].initializeApp(FIREBASE_CONFIG);
+      fbAuth = m[1];
+      fbStore = m[2];
+      auth = fbAuth.getAuth(app);
+      try {
+        // copia locale: l'app funziona anche senza rete e si riallinea dopo
+        db = fbStore.initializeFirestore(app, {
+          localCache: fbStore.persistentLocalCache({ tabManager: fbStore.persistentMultipleTabManager() })
+        });
+      } catch (e) {
+        db = fbStore.getFirestore(app);
+      }
+      $('account').hidden = false;
+      renderAccount();
+      fbAuth.onAuthStateChanged(auth, onUser);
+
+      $('sign-in').addEventListener('click', function () {
+        say('account-msg', '');
+        fbAuth.signInWithPopup(auth, new fbAuth.GoogleAuthProvider()).catch(function (e) {
+          var code = (e && e.code) || '';
+          if (code === 'auth/popup-closed-by-user' || code === 'auth/cancelled-popup-request') return;
+          say('account-msg', code === 'auth/unauthorized-domain'
+            ? 'Questo indirizzo non è tra i domini autorizzati del progetto Firebase.'
+            : code === 'auth/popup-blocked'
+              ? 'Il browser ha bloccato la finestra di accesso: consenti i popup per questa pagina e riprova.'
+              : 'Accesso non riuscito' + (code ? ' (' + code + ')' : '') + '. Riprova.');
+        });
+      });
+
+      $('sign-out').addEventListener('click', function () { fbAuth.signOut(auth); });
+
+      $('migrate').addEventListener('click', function () {
+        var local = load();
+        if (!user || !local.length) return;
+        $('migrate').disabled = true;
+        persist(local).then(function () {
+          try { localStorage.removeItem(KEY); } catch (e) {}
+        }, function () {}).then(function () {
+          $('migrate').disabled = false;
+          renderAccount();
+        });
+      });
+    }).catch(function () {
+      // Google non raggiungibile: si continua con la lista di questo dispositivo
+      $('account').hidden = false;
+      $('sign-in').hidden = true;
+      $('account-text').textContent = 'Senza connessione a Google: per ora vedi la lista salvata su questo dispositivo.';
+    });
+  }
+
+  function newId() {
+    return Date.now().toString(36) + Math.random().toString(36).slice(2, 8);
+  }
+
+  function fmt(n) {
+    return n.toLocaleString('it-IT', { minimumFractionDigits: 1, maximumFractionDigits: 1 });
+  }
+
+  function seasonText(n) {
+    return n > 0 ? 'Stagione ' + n : 'Tutte le stagioni';
+  }
+
+  function fillSeasons(select) {
+    for (var n = 0; n <= MAX_SEASONS; n++) {
+      var o = document.createElement('option');
+      o.value = String(n);
+      o.textContent = seasonText(n);
+      select.appendChild(o);
+    }
+  }
+
+  // Voti interi senza decimale: "5 / 5", ma "3,5 / 5"
+  function fmtVote(v) {
+    return v % 1 === 0 ? String(v) : fmt(v);
+  }
+
+  function ratingText(v) {
+    return v > 0 ? fmtVote(v) + ' / 5' : 'Nessun voto';
+  }
+
+  /* ---------- Stelle ---------- */
+
+  function starSvg() {
+    var s = document.createElementNS(SVG_NS, 'svg');
+    s.setAttribute('viewBox', '0 0 24 24');
+    s.setAttribute('aria-hidden', 'true');
+    var p = document.createElementNS(SVG_NS, 'path');
+    p.setAttribute('d', STAR_PATH);
+    s.appendChild(p);
+    return s;
+  }
+
+  function makeStars(value, onChange, label, big) {
+    var el = document.createElement('div');
+    el.className = 'stars' + (big ? ' big' : '');
+    el.tabIndex = 0;
+    el.setAttribute('role', 'slider');
+    el.setAttribute('aria-label', label);
+    el.setAttribute('aria-valuemin', '0');
+    el.setAttribute('aria-valuemax', '5');
+
+    var fills = [];
+    for (var i = 0; i < 5; i++) {
+      var st = document.createElement('span');
+      st.className = 'star';
+      st.appendChild(starSvg());
+      var f = document.createElement('span');
+      f.className = 'fill';
+      f.appendChild(starSvg());
+      st.appendChild(f);
+      el.appendChild(st);
+      fills.push(f);
+    }
+
+    var current = value;
+
+    function paint(v) {
+      fills.forEach(function (f, i) {
+        f.style.width = Math.max(0, Math.min(1, v - i)) * 100 + '%';
+      });
+    }
+
+    function sync() {
+      paint(current);
+      el.setAttribute('aria-valuenow', String(current));
+      el.setAttribute('aria-valuetext', current > 0 ? fmtVote(current) + ' stelle su 5' : 'Nessun voto');
+      up.disabled = current >= 5;
+    }
+
+    function fromEvent(e) {
+      var r = el.getBoundingClientRect();
+      var raw = (e.clientX - r.left) / r.width * 5;
+      return Math.min(5, Math.max(0.5, Math.ceil(raw * 2) / 2));
+    }
+
+    function set(v) {
+      current = Math.min(5, Math.max(0, v));
+      sync();
+      onChange(current);
+    }
+
+    el.addEventListener('pointermove', function (e) {
+      if (e.pointerType === 'mouse') paint(fromEvent(e));
+    });
+    el.addEventListener('pointerleave', function () { paint(current); });
+    // Con il mouse conta la metà della stella su cui si clicca.
+    // Con il dito il bersaglio è la stella intera: piena -> mezza -> nessun voto.
+    var pointer = 'mouse';
+    el.addEventListener('pointerdown', function (e) { pointer = e.pointerType || 'mouse'; });
+    el.addEventListener('click', function (e) {
+      var v = fromEvent(e);
+      if (pointer === 'mouse') {
+        set(v === current ? 0 : v); // un secondo clic sullo stesso voto lo azzera
+        return;
+      }
+      var n = Math.ceil(v);
+      set(current === n ? n - 0.5 : current === n - 0.5 ? 0 : n);
+    });
+    el.addEventListener('keydown', function (e) {
+      if (e.key === 'ArrowRight' || e.key === 'ArrowUp') { e.preventDefault(); set(current + 0.5); }
+      else if (e.key === 'ArrowLeft' || e.key === 'ArrowDown') { e.preventDefault(); set(current - 0.5); }
+      else if (e.key === 'Home') { e.preventDefault(); set(0); }
+      else if (e.key === 'End') { e.preventDefault(); set(5); }
+    });
+
+    // Freccetta: ogni tocco aggiunge mezza stella
+    var up = document.createElement('button');
+    up.type = 'button';
+    up.className = 'step';
+    up.textContent = '\u25B6\uFE0E';
+    up.title = 'Aggiungi mezza stella';
+    up.setAttribute('aria-label', label + ': aggiungi mezza stella');
+    up.addEventListener('click', function () { set(current + 0.5); });
+
+    var wrap = document.createElement('span');
+    wrap.className = 'rating';
+    wrap.appendChild(el);
+    wrap.appendChild(up);
+    wrap.setValue = function (v) { current = v; sync(); };
+    sync();
+    return wrap;
+  }
+
+  /* ---------- Copia dell'elenco di un anno ---------- */
+
+  var COPY_ICON = '<svg viewBox="0 0 24 24" aria-hidden="true"><rect x="9" y="9" width="11" height="11" rx="2"/>' +
+    '<path d="M5 15V6a2 2 0 0 1 2-2h9"/></svg>';
+
+  function yearText(year, group) {
+    var lines = [(tab === 'film' ? 'Film visti nel ' : 'Serie TV viste nel ') + year];
+    group.forEach(function (it) {
+      var line = it.title;
+      if (it.released) line += ' (' + it.released + ')';
+      if (it.type === 'tv') line += ' (' + seasonText(it.season).toLowerCase() + ')';
+      if (it.rating > 0) line += ' - ' + fmtVote(it.rating) + '/5';
+      lines.push(line);
+    });
+    return lines.join('\n');
+  }
+
+  function copyText(text) {
+    if (navigator.clipboard && navigator.clipboard.writeText) {
+      return navigator.clipboard.writeText(text).catch(function () { return copyFallback(text); });
+    }
+    return copyFallback(text);
+  }
+
+  function copyFallback(text) {
+    return new Promise(function (resolve, reject) {
+      var ta = document.createElement('textarea');
+      ta.value = text;
+      ta.setAttribute('readonly', '');
+      ta.style.position = 'fixed';
+      ta.style.opacity = '0';
+      document.body.appendChild(ta);
+      ta.select();
+      var ok = false;
+      try { ok = document.execCommand('copy'); } catch (e) {}
+      ta.remove();
+      if (ok) resolve(); else reject(new Error('copy'));
+    });
+  }
+
+  function copyYear(year, group, button) {
+    var label = button.querySelector('span');
+    copyText(yearText(year, group)).then(function () {
+      label.textContent = 'Copiato';
+    }, function () {
+      label.textContent = 'Copia non riuscita';
+    }).then(function () {
+      setTimeout(function () { label.textContent = 'Copia'; }, 2000);
+    });
+  }
+
+  /* ---------- Lista ---------- */
+
+  function sorter(a, b) {
+    if (sortBy === 'rating') return b.rating - a.rating || b.added - a.added;
+    if (sortBy === 'title') {
+      return a.title.localeCompare(b.title, 'it', { sensitivity: 'base' }) || a.season - b.season;
+    }
+    return b.added - a.added;
+  }
+
+  function render() {
+    var nFilm = 0, nTv = 0;
+    items.forEach(function (it) { if (it.type === 'tv') nTv++; else nFilm++; });
+    $('count-film').textContent = nFilm ? '(' + nFilm + ')' : '';
+    $('count-tv').textContent = nTv ? '(' + nTv + ')' : '';
+
+    document.querySelectorAll('.tab').forEach(function (t) {
+      t.setAttribute('aria-selected', String(t.dataset.type === tab));
+    });
+    $('add-title-label').textContent = tab === 'film' ? 'Titolo del film' : 'Titolo della serie';
+    $('add-title').placeholder = tab === 'film' ? 'Es. La grande bellezza' : 'Es. Gomorra';
+    $('add-season-field').hidden = tab !== 'tv';
+    $('add-released-label').textContent = tab === 'film' ? 'Anno del film' : 'Anno della serie';
+    $('search').placeholder = tab === 'film' ? 'Cerca tra i film segnati' : 'Cerca tra le serie segnate';
+
+    var list = $('list');
+    list.textContent = '';
+
+    var mine = items.filter(function (it) { return it.type === tab; });
+    $('toolbar').hidden = mine.length === 0;
+    $('search-row').hidden = mine.length === 0 || !searchOpen;
+
+    if (!mine.length) {
+      var empty = document.createElement('div');
+      empty.className = 'empty';
+      empty.textContent = user && !cloudReady
+        ? 'Carico la lista dal tuo account…'
+        : tab === 'film'
+        ? 'Nessun film ancora. Aggiungi il primo qui sopra.'
+        : 'Nessuna serie ancora. Aggiungi la prima qui sopra.';
+      list.appendChild(empty);
+      return;
+    }
+
+    // ricerca: per titolo o anno di uscita, in tutti gli anni di visione
+    var q = searchOpen ? query.trim().toLowerCase() : '';
+    if (q) {
+      mine = mine.filter(function (it) {
+        return it.title.toLowerCase().indexOf(q) !== -1 || String(it.released || '').indexOf(q) === 0;
+      });
+      if (!mine.length) {
+        var none = document.createElement('div');
+        none.className = 'empty';
+        none.textContent = 'Nessun titolo segnato corrisponde a "' + query.trim() + '".';
+        list.appendChild(none);
+        return;
+      }
+    }
+
+    var byYear = {};
+    mine.forEach(function (it) { (byYear[it.year] = byYear[it.year] || []).push(it); });
+    var years = Object.keys(byYear).map(Number).sort(function (a, b) { return b - a; });
+
+    years.forEach(function (year) {
+      var group = byYear[year].sort(sorter);
+      var rated = group.filter(function (it) { return it.rating > 0; });
+      var avg = rated.length
+        ? rated.reduce(function (s, it) { return s + it.rating; }, 0) / rated.length
+        : 0;
+
+      var section = document.createElement('section');
+      section.className = 'year';
+
+      var head = document.createElement('div');
+      head.className = 'year-head';
+      var h2 = document.createElement('h2');
+      h2.textContent = year;
+      var meta = document.createElement('div');
+      meta.className = 'meta';
+      var noun = tab === 'film' ? 'film' : 'serie';
+      meta.textContent = group.length + ' ' + noun + (rated.length ? ', media ' + fmt(avg) : '');
+      var copy = document.createElement('button');
+      copy.type = 'button';
+      copy.className = 'btn small copy';
+      copy.innerHTML = COPY_ICON + '<span>Copia</span>';
+      copy.setAttribute('aria-label', 'Copia l\'elenco del ' + year);
+      copy.addEventListener('click', function () { copyYear(year, group, copy); });
+
+      var tools = document.createElement('div');
+      tools.className = 'year-tools';
+      tools.appendChild(meta);
+      tools.appendChild(copy);
+      head.appendChild(h2);
+      head.appendChild(tools);
+      section.appendChild(head);
+
+      var ul = document.createElement('ul');
+      ul.className = 'items';
+      group.forEach(function (it) {
+        var li = document.createElement('li');
+        li.className = 'item';
+
+        var title = document.createElement('span');
+        title.className = 'title';
+        title.textContent = it.title;
+        if (it.released) {
+          var rel = document.createElement('span');
+          rel.className = 'released';
+          rel.textContent = '(' + it.released + ')';
+          title.appendChild(rel);
+        }
+        var fullName = it.title;
+        if (it.type === 'tv') {
+          var badge = document.createElement('span');
+          badge.className = 'season';
+          badge.textContent = seasonText(it.season);
+          title.appendChild(badge);
+          fullName += ', ' + seasonText(it.season).toLowerCase();
+        }
+
+        var stars = makeStars(it.rating, function (v) {
+          it.rating = v;
+          persist([it]);
+          render();
+        }, 'Voto per ' + fullName);
+
+        var edit = document.createElement('button');
+        edit.type = 'button';
+        edit.className = 'icon-btn';
+        edit.textContent = '✎';
+        edit.title = 'Modifica';
+        edit.setAttribute('aria-label', 'Modifica ' + fullName);
+        edit.addEventListener('click', function () { openEdit(it.id); });
+
+        li.appendChild(title);
+        li.appendChild(stars);
+        li.appendChild(edit);
+        ul.appendChild(li);
+      });
+      section.appendChild(ul);
+      list.appendChild(section);
+    });
+  }
+
+  /* ---------- Aggiunta ---------- */
+
+  var addRating = 0;
+  var addStars = makeStars(0, function (v) {
+    addRating = v;
+    $('add-rating-out').textContent = ratingText(v);
+  }, 'Voto', true);
+  $('add-stars-slot').appendChild(addStars);
+  $('add-year').value = new Date().getFullYear();
+  fillSeasons($('add-season'));
+  fillSeasons($('edit-season'));
+
+  // Il pulsante non usa l'invio del modulo: in alcune pagine incorporate
+  // (anteprime, riquadri protetti) l'invio dei moduli viene bloccato.
+  function addItem() {
+    if (!$('add-title').value.trim()) {
+      say('add-msg', 'Scrivi un titolo.');
+      $('add-title').focus();
+      return;
+    }
+    var item = clean({
+      title: $('add-title').value,
+      released: $('add-released').value,
+      year: $('add-year').value,
+      type: tab,
+      season: $('add-season').value,
+      rating: addRating,
+      added: Date.now()
+    });
+    if (!item) {
+      say('add-msg', 'Scrivi un anno tra 1900 e 2100.');
+      $('add-year').focus();
+      return;
+    }
+    say('add-msg', '');
+    cancelSuggest();
+    items.push(item);
+    persist([item]);
+    $('add-title').value = '';
+    $('add-released').value = '';
+    $('add-season').value = '0';
+    addRating = 0;
+    addStars.setValue(0);
+    $('add-rating-out').textContent = ratingText(0);
+    render();
+    $('add-title').focus();
+  }
+
+  $('add-btn').addEventListener('click', addItem);
+  $('add-form').addEventListener('submit', function (e) { e.preventDefault(); addItem(); });
+  ['add-title', 'add-released', 'add-year'].forEach(function (id) {
+    $(id).addEventListener('keydown', function (e) {
+      // Invio sceglie il suggerimento evidenziato, se c'è; altrimenti aggiunge
+      if (e.key === 'Enter' && !e.defaultPrevented) { e.preventDefault(); addItem(); }
+    });
+  });
+
+  /* ---------- Suggerimenti dei titoli (Wikidata) ---------- */
+
+  var SUGGEST_URL = 'https://www.wikidata.org/w/api.php?action=wbsearchentities&type=item' +
+    '&language=it&uselang=it&limit=50&format=json&origin=*&search=';
+  var SUGGEST_MAX = 8;
+  var YEAR_MIN = 1920;
+  var YEAR_MAX = new Date().getFullYear();
+
+  // Wikidata restituisce di tutto (libri, album, città...): si tengono solo
+  // le voci la cui descrizione dice che sono un film o una serie TV.
+  var FILM_RE = /^film\b|^(cortometraggio|mediometraggio|documentario)\b|^\d{4}\b.*\bfilm\b/i;
+  var FILM_NOT = /\b(album|soundtrack|series|score|poster|trailer|festival)\b/i;
+  var TV_RE = /^(serie televisiva|serie tv|serie animata|serie anime|miniserie|webserie|sitcom|soap opera|telenovela|anime)\b|\b(television|tv|web|anime|animated) (series|miniseries|show)\b|^\d{4}\b.*\b(miniseries|sitcom)\b/i;
+  var TV_NOT = /\b(episod\w*|stagione|season|personaggio|character|album|franchise)\b/i;
+
+  var sInput = $('add-title');
+  var sBox = $('suggest');
+  var sItems = [];
+  var sActive = -1;
+  var sTimer = null;
+  var sCtrl = null;
+  var sSeq = 0;
+
+  function filterSuggest(rows, type) {
+    var out = [], seen = {};
+    for (var i = 0; i < rows.length && out.length < SUGGEST_MAX; i++) {
+      var title = rows[i].label;
+      var desc = rows[i].description || '';
+      if (!title || !desc) continue;
+      var y = desc.match(/\b(1[89]\d\d|20\d\d)\b/);
+      if (type === 'tv') {
+        if (!TV_RE.test(desc) || TV_NOT.test(desc)) continue;
+      } else {
+        if (!FILM_RE.test(desc) || FILM_NOT.test(desc)) continue;
+        if (y && (y[1] < YEAR_MIN || y[1] > YEAR_MAX)) continue;
+      }
+      var key = title + '|' + desc;
+      if (seen[key]) continue;
+      seen[key] = true;
+      out.push({ title: title, desc: desc, year: y ? y[1] : '' });
+    }
+    return out;
+  }
+
+  function closeSuggest() {
+    sItems = [];
+    sActive = -1;
+    sBox.hidden = true;
+    sBox.textContent = '';
+    sInput.setAttribute('aria-expanded', 'false');
+    sInput.removeAttribute('aria-activedescendant');
+  }
+
+  // Chiude e scarta anche le risposte ancora in arrivo
+  function cancelSuggest() {
+    clearTimeout(sTimer);
+    sSeq++;
+    if (sCtrl) sCtrl.abort();
+    closeSuggest();
+  }
+
+  function pickSuggest(i) {
+    if (!sItems[i]) return;
+    sInput.value = sItems[i].title;
+    $('add-released').value = sItems[i].year;
+    cancelSuggest();
+    sInput.focus();
+  }
+
+  function markSuggest(i) {
+    sActive = i;
+    var opts = sBox.children;
+    for (var k = 0; k < opts.length; k++) opts[k].setAttribute('aria-selected', String(k === i));
+    if (i >= 0) {
+      sInput.setAttribute('aria-activedescendant', opts[i].id);
+      opts[i].scrollIntoView({ block: 'nearest' });
+    } else {
+      sInput.removeAttribute('aria-activedescendant');
+    }
+  }
+
+  function showSuggest(list) {
+    closeSuggest();
+    if (!list.length) return;
+    sItems = list;
+    list.forEach(function (it, i) {
+      var opt = document.createElement('div');
+      opt.className = 'opt';
+      opt.id = 'suggest-' + i;
+      opt.setAttribute('role', 'option');
+      opt.setAttribute('aria-selected', 'false');
+      var b = document.createElement('b');
+      b.textContent = it.title;
+      var d = document.createElement('small');
+      d.textContent = it.desc;
+      opt.appendChild(b);
+      opt.appendChild(d);
+      // senza questo il clic toglierebbe il focus al campo e chiuderebbe l'elenco
+      opt.addEventListener('mousedown', function (e) { e.preventDefault(); });
+      opt.addEventListener('click', function (e) { e.preventDefault(); pickSuggest(i); });
+      sBox.appendChild(opt);
+    });
+    var form = $('add-form');
+    sBox.style.top = (sInput.getBoundingClientRect().bottom - form.getBoundingClientRect().top + 4) + 'px';
+    sBox.hidden = false;
+    sInput.setAttribute('aria-expanded', 'true');
+  }
+
+  function querySuggest() {
+    var q = sInput.value.trim();
+    if (sCtrl) sCtrl.abort();
+    var seq = ++sSeq;
+    if (q.length < 2 || !window.fetch) { closeSuggest(); return; }
+    var type = tab;
+    sCtrl = window.AbortController ? new AbortController() : null;
+    fetch(SUGGEST_URL + encodeURIComponent(q), sCtrl ? { signal: sCtrl.signal } : undefined)
+      .then(function (r) { if (!r.ok) throw new Error('http'); return r.json(); })
+      .then(function (data) {
+        if (seq !== sSeq) return;
+        showSuggest(filterSuggest(data.search || [], type));
+      })
+      .catch(function () {
+        // senza rete o con Wikidata non raggiungibile si scrive il titolo a mano
+        if (seq === sSeq) closeSuggest();
+      });
+  }
+
+  sInput.addEventListener('input', function () {
+    clearTimeout(sTimer);
+    sTimer = setTimeout(querySuggest, 250);
+  });
+
+  sInput.addEventListener('keydown', function (e) {
+    if (sBox.hidden) return;
+    if (e.key === 'ArrowDown') { e.preventDefault(); markSuggest((sActive + 1) % sItems.length); }
+    else if (e.key === 'ArrowUp') { e.preventDefault(); markSuggest(sActive <= 0 ? sItems.length - 1 : sActive - 1); }
+    else if (e.key === 'Enter' && sActive >= 0) { e.preventDefault(); pickSuggest(sActive); }
+    else if (e.key === 'Escape') { e.preventDefault(); cancelSuggest(); }
+  });
+
+  sInput.addEventListener('blur', function () {
+    setTimeout(function () {
+      // se nel frattempo si è tornati nel campo, la ricerca in corso resta valida
+      if (document.activeElement !== sInput) cancelSuggest();
+    }, 150);
+  });
+
+  /* ---------- Modifica ---------- */
+
+  var dialog = $('edit-dialog');
+  var editRating = 0;
+  var editStars = makeStars(0, function (v) {
+    editRating = v;
+    $('edit-rating-out').textContent = ratingText(v);
+  }, 'Voto', true);
+  $('edit-stars-slot').appendChild(editStars);
+
+  function openEdit(id) {
+    var it = items.find(function (x) { return x.id === id; });
+    if (!it) return;
+    editingId = id;
+    disarmDelete();
+    $('edit-title').value = it.title;
+    $('edit-released').value = it.released || '';
+    $('edit-released-label').textContent = it.type === 'tv' ? 'Anno della serie' : 'Anno del film';
+    $('edit-year').value = it.year;
+    $('edit-type').value = it.type;
+    $('edit-season').value = String(it.season);
+    $('edit-season-field').hidden = it.type !== 'tv';
+    editRating = it.rating;
+    editStars.setValue(it.rating);
+    $('edit-rating-out').textContent = ratingText(it.rating);
+    if (dialog.showModal) dialog.showModal(); else dialog.setAttribute('open', '');
+  }
+
+  function closeEdit() {
+    editingId = null;
+    if (dialog.close) dialog.close(); else dialog.removeAttribute('open');
+  }
+
+  function saveEdit() {
+    var it = items.find(function (x) { return x.id === editingId; });
+    if (it) {
+      var next = clean({
+        id: it.id,
+        title: $('edit-title').value,
+        released: $('edit-released').value,
+        year: $('edit-year').value,
+        type: $('edit-type').value,
+        season: $('edit-season').value,
+        rating: editRating,
+        added: it.added
+      });
+      if (!next) return;
+      items[items.indexOf(it)] = next;
+      persist([next]);
+    }
+    closeEdit();
+    render();
+  }
+
+  $('edit-save').addEventListener('click', saveEdit);
+  $('edit-form').addEventListener('submit', function (e) { e.preventDefault(); saveEdit(); });
+  ['edit-title', 'edit-released', 'edit-year'].forEach(function (id) {
+    $(id).addEventListener('keydown', function (e) {
+      if (e.key === 'Enter') { e.preventDefault(); saveEdit(); }
+    });
+  });
+
+  $('edit-cancel').addEventListener('click', closeEdit);
+
+  $('edit-type').addEventListener('change', function (e) {
+    $('edit-season-field').hidden = e.target.value !== 'tv';
+    $('edit-released-label').textContent = e.target.value === 'tv' ? 'Anno della serie' : 'Anno del film';
+  });
+
+  // Eliminazione in due tocchi, senza finestre di conferma del browser
+  var deleteArmed = false;
+
+  function disarmDelete() {
+    deleteArmed = false;
+    $('edit-delete').textContent = 'Elimina';
+  }
+
+  $('edit-delete').addEventListener('click', function () {
+    if (!deleteArmed) {
+      deleteArmed = true;
+      $('edit-delete').textContent = 'Conferma eliminazione';
+      return;
+    }
+    var gone = editingId;
+    items = items.filter(function (x) { return x.id !== gone; });
+    forget(gone);
+    closeEdit();
+    render();
+  });
+
+  /* ---------- Schede e ordinamento ---------- */
+
+  document.querySelectorAll('.tab').forEach(function (t) {
+    t.addEventListener('click', function () {
+      tab = t.dataset.type;
+      cancelSuggest();
+      render();
+    });
+  });
+
+  function setSearch(open) {
+    searchOpen = open;
+    if (!open) { query = ''; $('search').value = ''; }
+    $('search-toggle').setAttribute('aria-expanded', String(open));
+    render();
+    if (open) $('search').focus();
+  }
+
+  $('search-toggle').addEventListener('click', function () { setSearch(!searchOpen); });
+  $('search').addEventListener('input', function (e) { query = e.target.value; render(); });
+  $('search').addEventListener('keydown', function (e) {
+    if (e.key === 'Escape') { setSearch(false); $('search-toggle').focus(); }
+  });
+
+  $('sort').addEventListener('change', function (e) {
+    sortBy = e.target.value;
+    render();
+  });
+
+  /* ---------- Esporta / Importa ---------- */
+
+  $('export').addEventListener('click', function () {
+    var blob = new Blob([JSON.stringify(items, null, 2)], { type: 'application/json' });
+    var a = document.createElement('a');
+    a.href = URL.createObjectURL(blob);
+    a.download = 'visti-valeria-' + new Date().toISOString().slice(0, 10) + '.json';
+    document.body.appendChild(a);
+    a.click();
+    a.remove();
+    setTimeout(function () { URL.revokeObjectURL(a.href); }, 1000);
+  });
+
+  $('import').addEventListener('click', function () { $('import-file').click(); });
+
+  $('import-file').addEventListener('change', function (e) {
+    var file = e.target.files[0];
+    e.target.value = '';
+    if (!file) return;
+    var reader = new FileReader();
+    reader.onload = function () {
+      try {
+        var data = JSON.parse(reader.result);
+        if (!Array.isArray(data)) throw new Error('formato');
+        var incoming = data.map(clean).filter(Boolean);
+        if (!incoming.length) throw new Error('vuoto');
+        var byId = {};
+        items.forEach(function (it) { byId[it.id] = it; });
+        incoming.forEach(function (it) { byId[it.id] = it; });
+        items = Object.keys(byId).map(function (k) { return byId[k]; });
+        persist(incoming);
+        render();
+        say('io-msg', 'Importati ' + incoming.length + ' titoli.');
+      } catch (err) {
+        say('io-msg', 'Il file non è un backup valido.');
+      }
+    };
+    reader.readAsText(file);
+  });
+
+  if (storageBroken) showNotice();
+  render();
+  initCloud();
+})();
+</script>
+</body>
+</html>
